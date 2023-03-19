@@ -21,7 +21,7 @@ namespace MathBrawlServer
             return ConnID;
         }
 
-        public void AddPlayerToRoom(Guid userId)
+        public void AddPlayerToRoom(Payload user)
         {
             if (rooms.Count > 0)
             {
@@ -30,18 +30,18 @@ namespace MathBrawlServer
                     if (room.Value.Count == 1)
                     {
                         // add player here
-                        room.Value.Add(userId);
+                        room.Value.Add(user.PlayerId);
                         Console.WriteLine("adding player to an existing room!");
                         
                         // start a new game between these two player
-                        
+                        // WsMiddleware.
                         
                         break;
                     }
                     else
                     {
                         // create new room and add player there
-                        var newRoom = new KeyValuePair<Guid, ConcurrentBag<Guid>> (Guid.NewGuid(), new ConcurrentBag<Guid>(){userId});
+                        var newRoom = new KeyValuePair<Guid, ConcurrentBag<Guid>> (Guid.NewGuid(), new ConcurrentBag<Guid>(){user.PlayerId});
                         rooms.TryAdd(newRoom.Key, newRoom.Value);
                         Console.WriteLine("adding player to a new  room!");
                         
@@ -55,7 +55,7 @@ namespace MathBrawlServer
             else
             {
                 // create first room and add player there
-                var newRoom = new KeyValuePair<Guid, ConcurrentBag<Guid>> (Guid.NewGuid(), new ConcurrentBag<Guid>(){userId});
+                var newRoom = new KeyValuePair<Guid, ConcurrentBag<Guid>> (Guid.NewGuid(), new ConcurrentBag<Guid>(){user.PlayerId});
                 rooms.TryAdd(newRoom.Key, newRoom.Value);
                 Console.WriteLine("adding player to the first  room!");
             }

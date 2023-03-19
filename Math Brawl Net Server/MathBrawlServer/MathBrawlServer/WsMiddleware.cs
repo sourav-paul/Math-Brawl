@@ -89,7 +89,7 @@ namespace MathBrawlServer
             {
                 case "user-creation":
                     payload.Status = "room";
-                    _manager.AddPlayerToRoom(payload.PlayerId);
+                    _manager.AddPlayerToRoom(payload);
                     break;
                 
                 
@@ -98,20 +98,20 @@ namespace MathBrawlServer
                     break;
             }
 
-            // if (Guid.TryParse(routeOb.To.ToString(), out Guid guidOutput))
-            // {
-            //     Console.WriteLine("Targeted");
-            //     var sock = _manager.GetAllSockets().FirstOrDefault(s => s.Key == routeOb.To.ToString());
-            //     if (sock.Value != null)
-            //     {
-            //         if (sock.Value.State == WebSocketState.Open)
-            //             await sock.Value.SendAsync(Encoding.UTF8.GetBytes(routeOb.Message.ToString()), WebSocketMessageType.Text, true, CancellationToken.None);
-            //     }
-            //     else
-            //     {
-            //         Console.WriteLine("Invalid Recipient");
-            //     }
-            // }
+            if (!string.IsNullOrEmpty(payload.PlayerId.ToString()))
+            {
+                Console.WriteLine("Targeted");
+                var sock = _manager.GetAllSockets().FirstOrDefault(s => s.Key == payload.PlayerId.ToString());
+                if (sock.Value != null)
+                {
+                    if (sock.Value.State == WebSocketState.Open)
+                        await sock.Value.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload)), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid Recipient");
+                }
+            }
             // else
             // {
             //     Console.WriteLine("Broadcast");
@@ -121,6 +121,24 @@ namespace MathBrawlServer
             //             await sock.Value.SendAsync(Encoding.UTF8.GetBytes(routeOb.Message.ToString()), WebSocketMessageType.Text, true, CancellationToken.None);
             //     }
             // }
+        }
+
+        public async Task RouteGameMessageAsync(string message)
+        {
+            var payload = JsonConvert.DeserializeObject<Payload>(message);
+
+            switch (payload.Status)
+            {
+                case "user-creation":
+                    payload.Status = "room";
+                    _manager.AddPlayerToRoom(payload);
+                    break;
+                
+                
+                
+                default:
+                    break;
+            }
         }
     }
 }

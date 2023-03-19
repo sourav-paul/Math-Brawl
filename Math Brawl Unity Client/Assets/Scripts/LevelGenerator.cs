@@ -12,6 +12,7 @@ public class LevelGenerator
         public List<int> Numbers { get; set; }
         public List<Operation> Operations { get; set; }
         public double Solution { get; set; }
+        public TimeSpan Time { get; set; }
     }
     
     public enum Operation

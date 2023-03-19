@@ -43,12 +43,44 @@ public class Connection : MonoBehaviour
             ClientPayload.PlayerId = Guid.Parse(message.TrimStart("ConnID: ".ToCharArray()));
             ClientPayload.Client = "player";
             Refs.PlayerCreation.SetActive(true);
-            
-            
         }
         else
         {
-            
+            ProcessGameMessages(message);
+        }
+    }
+
+    private void ProcessGameMessages(string message)
+    {
+        var payload = JsonConvert.DeserializeObject<Payload>(message);
+        
+        switch (payload.Status)
+        {
+            case "room":
+                Refs.PlayerCreation.SetActive(false);
+                // activate game window
+                Refs.GameWindow.SetActive(true);
+                
+                // activate waiting for opponent
+                break;
+            case "playing":
+                Refs.GameStatus.SetActive(false);
+                
+                Refs.TimerText.text = payload.Level.Time.ToString();
+                
+                Refs.NumbersContainer.SetActive(true);
+                // instantiate all numbers
+                
+                Refs.OperationsContainer.SetActive(true);
+                // instantiate all operations
+                
+                Refs.DropablesContainer.SetActive(true);
+                // instantiate all droppables
+                
+                break;;
+            default:
+                Debug.LogError("unknown player status!");
+                break;
         }
     }
 

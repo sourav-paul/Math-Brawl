@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class ReferenceManager : MonoBehaviour
@@ -15,7 +16,13 @@ public class ReferenceManager : MonoBehaviour
     public Button StartButton;
     
     public GameObject GameWindow;
-
+    public TMP_Text TimerText;
+    public GameObject GameContainer;
+    public GameObject NumbersContainer;
+    public GameObject OperationsContainer;
+    public GameObject DropablesContainer;
+    public GameObject GameStatus;
+    
     public GameObject ConnectionManager;
 
     private void Awake()

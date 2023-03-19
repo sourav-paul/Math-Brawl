@@ -12,6 +12,7 @@ namespace MathBrawlServer
             public List<int> Numbers { get; set; }
             public List<Operation> Operations { get; set; }
             public double Solution { get; set; }
+            public TimeSpan Time { get; set; }
         }
         
         public enum Operation
@@ -60,6 +61,7 @@ namespace MathBrawlServer
             level.Operations = new List<Operation>();
             level.Operations.AddRange(operations);
             level.Solution = nums[0];
+            level.Time = TimeSpan.FromSeconds(90);
             return level;
         }
 

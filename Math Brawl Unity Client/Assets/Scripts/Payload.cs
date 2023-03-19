@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class Payload
 {
-    public string Type { get; set; }  // "connect" / "level" / ""
+    public string Type { get; set; }  // "connect" / "level" / "user-creation"
     public string Client { get; set; } // "dashboard" / "leaderboard" / "player"
         
-    public string Status { get; set; } // "lobby" / "playing" / 
+    public string Status { get; set; } // "room" / "playing" / 
         
     public Guid PlayerId { get; set; }
     public Guid RoomId { get; set; }
