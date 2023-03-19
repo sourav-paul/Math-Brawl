@@ -7,72 +7,81 @@ using NativeWebSocket;
 
 public class Connection : MonoBehaviour
 {
-    WebSocket websocket;
-
-    private void Awake()
-    {
-        
-    }
+    public string Url = "ws://localhost:5000";
+    
+    private WebSocket WebSocket;
     
     async void Start()
     {
-        
+        ConnectWs();
     }
 
     public async void ConnectWs()
     {
-        // websocket = new WebSocket("ws://echo.websocket.org");
-        websocket = new WebSocket("ws://localhost:5000");
+        WebSocket = new WebSocket(Url);
 
-        websocket.OnOpen += () =>
-        {
-            Debug.Log("Connection open!");
-        };
+        WebSocket.OnOpen += WebSocketOnOpen();
+        WebSocket.OnError += WebSocketOnError();
+        WebSocket.OnClose += WebSocketOnClose();
+        WebSocket.OnMessage += WebSocketOnMessage();
 
-        websocket.OnError += (e) =>
-        {
-            Debug.Log("Error! " + e);
-        };
+        await WebSocket.Connect();
+    }
 
-        websocket.OnClose += (e) =>
+    private static WebSocketMessageEventHandler WebSocketOnMessage()
+    {
+        return (bytes) =>
         {
-            Debug.Log("Connection closed!");
-        };
-
-        websocket.OnMessage += (bytes) =>
-        {
-            // Reading a plain text message
             var message = System.Text.Encoding.UTF8.GetString(bytes);
             Debug.Log("Received OnMessage! (" + bytes.Length + " bytes) " + message);
         };
-
-        // Keep sending messages at every 0.3s
-        InvokeRepeating("SendWebSocketMessage", 0.0f, 0.3f);
-
-        await websocket.Connect();
     }
-    
+
+    private static WebSocketCloseEventHandler WebSocketOnClose()
+    {
+        return (e) =>
+        {
+            Debug.Log("Connection closed!");
+        };
+    }
+
+    private static WebSocketErrorEventHandler WebSocketOnError()
+    {
+        return (e) =>
+        {
+            Debug.Log("Error! " + e);
+        };
+    }
+
+    private static WebSocketOpenEventHandler WebSocketOnOpen()
+    {
+        return () =>
+        {
+            Debug.Log("Connection open!");
+        };
+    }
+
     void Update()
     {
-        // #if !UNITY_WEBGL || UNITY_EDITOR
-        //     websocket.DispatchMessageQueue();
-        // #endif
+        #if !UNITY_WEBGL || UNITY_EDITOR
+            WebSocket.DispatchMessageQueue();
+        #endif
     }
 
     async void SendWebSocketMessage()
     {
-        if (websocket.State == WebSocketState.Open)
+        if (WebSocket.State == WebSocketState.Open)
         {
             // Sending bytes
-            await websocket.Send(new byte[] { 10, 20, 30 });
+            await WebSocket.Send(new byte[] { 10, 20, 30 });
 
             // Sending plain text
-            await websocket.SendText("plain text message");
+            await WebSocket.SendText("plain text message");
         }
     }
 
     private async void OnApplicationQuit()
     {
-        await websocket.Close();
+        await WebSocket.Close();
     }
 }
