@@ -28,8 +28,8 @@ namespace MathBrawlServer
             
             app.Run(async context => 
             {
-                Console.WriteLine("Hello from 3rd (terminal) Request Delegate");
-                await context.Response.WriteAsync("Hello from 3rd (terminal) Request Delegate");
+                Console.WriteLine("Third (terminal) Request Delegate");
+                await context.Response.WriteAsync("Third (terminal) Request Delegate");
             });
         }
     }

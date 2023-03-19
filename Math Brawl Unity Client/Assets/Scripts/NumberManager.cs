@@ -22,7 +22,7 @@ public class NumberManager : MonoBehaviour
 
     public void GetNumbers()
     {
-        var level = NumberGenerator.GenerateIntegers(totalNumbers);
+        var level = LevelGenerator.GenerateIntegers(totalNumbers);
 
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < level.Numbers.Count; i++)

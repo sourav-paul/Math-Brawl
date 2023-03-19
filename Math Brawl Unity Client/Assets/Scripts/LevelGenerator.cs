@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class NumberGenerator
+public class LevelGenerator
 {
     public class Level
     {

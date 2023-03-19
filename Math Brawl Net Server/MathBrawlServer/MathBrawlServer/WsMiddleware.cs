@@ -57,7 +57,7 @@ namespace MathBrawlServer
             }
             else
             {
-                Console.WriteLine("Hello from 2nd Request Delegate - No WebSocket");
+                Console.WriteLine("Second Request Delegate - No WebSocket");
                 await _next(context);
             }   
         }
