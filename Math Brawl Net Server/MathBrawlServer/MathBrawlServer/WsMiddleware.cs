@@ -37,7 +37,7 @@ namespace MathBrawlServer
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
                         Console.WriteLine($"Receive->Text");
-                        Console.WriteLine($"Message: {Encoding.UTF8.GetString(buffer, 0, result.Count)}");
+                        // Console.WriteLine($"Message: {Encoding.UTF8.GetString(buffer, 0, result.Count)}");
                         await RouteJSONMessageAsync(Encoding.UTF8.GetString(buffer, 0, result.Count));
                         return;
                     }
@@ -83,32 +83,44 @@ namespace MathBrawlServer
         
         private async Task RouteJSONMessageAsync(string message)
         {
+            var payload = JsonConvert.DeserializeObject<Payload>(message);
 
-            var routeOb = JsonConvert.DeserializeObject<dynamic>(message);
+            switch (payload.Type)
+            {
+                case "user-creation":
+                    payload.Status = "room";
+                    _manager.AddPlayerToRoom(payload.PlayerId);
+                    break;
+                
+                
+                
+                default:
+                    break;
+            }
 
-            if (Guid.TryParse(routeOb.To.ToString(), out Guid guidOutput))
-            {
-                Console.WriteLine("Targeted");
-                var sock = _manager.GetAllSockets().FirstOrDefault(s => s.Key == routeOb.To.ToString());
-                if (sock.Value != null)
-                {
-                    if (sock.Value.State == WebSocketState.Open)
-                        await sock.Value.SendAsync(Encoding.UTF8.GetBytes(routeOb.Message.ToString()), WebSocketMessageType.Text, true, CancellationToken.None);
-                }
-                else
-                {
-                    Console.WriteLine("Invalid Recipient");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Broadcast");
-                foreach (var sock in _manager.GetAllSockets())
-                {
-                    if (sock.Value.State == WebSocketState.Open)
-                        await sock.Value.SendAsync(Encoding.UTF8.GetBytes(routeOb.Message.ToString()), WebSocketMessageType.Text, true, CancellationToken.None);
-                }
-            }
+            // if (Guid.TryParse(routeOb.To.ToString(), out Guid guidOutput))
+            // {
+            //     Console.WriteLine("Targeted");
+            //     var sock = _manager.GetAllSockets().FirstOrDefault(s => s.Key == routeOb.To.ToString());
+            //     if (sock.Value != null)
+            //     {
+            //         if (sock.Value.State == WebSocketState.Open)
+            //             await sock.Value.SendAsync(Encoding.UTF8.GetBytes(routeOb.Message.ToString()), WebSocketMessageType.Text, true, CancellationToken.None);
+            //     }
+            //     else
+            //     {
+            //         Console.WriteLine("Invalid Recipient");
+            //     }
+            // }
+            // else
+            // {
+            //     Console.WriteLine("Broadcast");
+            //     foreach (var sock in _manager.GetAllSockets())
+            //     {
+            //         if (sock.Value.State == WebSocketState.Open)
+            //             await sock.Value.SendAsync(Encoding.UTF8.GetBytes(routeOb.Message.ToString()), WebSocketMessageType.Text, true, CancellationToken.None);
+            //     }
+            // }
         }
     }
 }

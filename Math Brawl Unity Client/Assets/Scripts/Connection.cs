@@ -41,7 +41,7 @@ public class Connection : MonoBehaviour
         if (message.Contains("ConnID"))
         {
             ClientPayload.PlayerId = Guid.Parse(message.TrimStart("ConnID: ".ToCharArray()));
-
+            ClientPayload.Client = "player";
             Refs.PlayerCreation.SetActive(true);
             
             

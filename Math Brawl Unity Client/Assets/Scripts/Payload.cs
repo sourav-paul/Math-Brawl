@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Payload
 {
@@ -10,6 +11,7 @@ public class Payload
     public string Status { get; set; } // "lobby" / "playing" / 
         
     public Guid PlayerId { get; set; }
+    public Guid RoomId { get; set; }
     public string PlayerName { get; set; }
     public Guid OpponentId { get; set; }
         
