@@ -10,7 +10,7 @@ public class NumberGenerator
     public class Level
     {
         public List<int> Numbers { get; set; }
-        public List<string> Operations { get; set; }
+        public List<Operation> Operations { get; set; }
         public double Solution { get; set; }
     }
     
@@ -33,33 +33,51 @@ public class NumberGenerator
 
     public static Level GenerateIntegers(int totalNumbers = 2)
     {
-        List<int> numbers = new List<int>()                {1,2,4,5,2,8,2};
-        List<Operation> operations = new List<Operation>() { Operation.Addition , Operation.Multiplication, Operation.Subtraction, Operation.Addition, Operation.Multiplication, Operation.Subtraction};
-        int additions = 2;
-        int subtractions = 2;
-        int multiplications = 2;
+        List<int> numbers = new List<int>()                /*{ 1,2,4,5,2,8,2 }*/;
+        List<Operation> operations = new List<Operation>() /*{ Operation.Addition , Operation.Multiplication, Operation.Subtraction, Operation.Addition, Operation.Multiplication, Operation.Subtraction}*/;
+        int additions = 0;
+        int subtractions = 0;
+        int multiplications = 0;
         int divisions = 0;
-        double solution = 0;
         
-        // GetRandomNumbers(totalNumbers, numbers);
-        // GetRandomOperations(totalNumbers, operations);
-        // GetOperationCounters(operations, ref additions, ref subtractions, ref multiplications, ref divisions);
+        GetRandomNumbers(totalNumbers, numbers);
+        GetRandomOperations(totalNumbers, operations);
+        GetOperationCounters(operations, ref additions, ref subtractions, ref multiplications, ref divisions);
 
-        numbers    = AdjustNumberIndices(numbers);
-        operations = AdjustOperationIndices(operations);
+        var nums    = AdjustNumberIndices(numbers);
+        var ops = AdjustOperationIndices(operations);
 
-        
-        
-        while (numbers.Count != 0 && operations.Count != 0)
+        CalculateSolution(nums, ops, multiplications, divisions, additions, subtractions);
+
+        var level = CreateLevel(numbers, operations, nums);
+
+        return level;
+    }
+
+    private static Level CreateLevel(List<int> numbers, List<Operation> operations, List<int> nums)
+    {
+        Level level = new Level();
+        level.Numbers = new List<int>();
+        level.Numbers.AddRange(numbers);
+        level.Operations = new List<Operation>();
+        level.Operations.AddRange(operations);
+        level.Solution = nums[0];
+        return level;
+    }
+
+    private static void CalculateSolution(List<int> nums, List<Operation> ops, int multiplications, int divisions, int additions,
+        int subtractions)
+    {
+        while (nums.Count != 1 && ops.Count != 1)
         {
             var no = new List<int>();
-            no.AddRange(numbers);
+            no.AddRange(nums);
             var op = new List<Operation>();
-            op.AddRange(operations);
+            op.AddRange(ops);
 
             int tempResult = 0;
 
-            if (multiplications != 0)
+            if (multiplications != 0 || divisions != 0)
             {
                 for (int i = 0; i < op.Count; i++)
                 {
@@ -67,40 +85,35 @@ public class NumberGenerator
                     {
                         tempResult += no[i - 1] * no[i + 1];
 
-                        numbers[i - 1] = tempResult;
-                        operations[i - 1] = Operation.NotSet;
+                        nums[i - 1] = tempResult;
+                        ops[i - 1] = Operation.NotSet;
 
-                        numbers.RemoveRange(i, 2);
-                        operations.RemoveRange(i, 2);
+                        nums.RemoveRange(i, 2);
+                        ops.RemoveRange(i, 2);
 
                         multiplications--;
+                        break;
                     }
-                }
-                
-                continue;
-            }
 
-            if (divisions != 0)
-            {
-                for (int i = 0; i < op.Count; i++)
-                {
                     if (op[i] == Operation.Division)
                     {
                         tempResult += no[i - 1] / no[i + 1];
 
-                        numbers[i - 1] = tempResult;
-                        operations[i - 1] = Operation.NotSet;
+                        nums[i - 1] = tempResult;
+                        ops[i - 1] = Operation.NotSet;
 
-                        numbers.RemoveRange(i, 2);
-                        operations.RemoveRange(i, 2);
+                        nums.RemoveRange(i, 2);
+                        ops.RemoveRange(i, 2);
 
                         divisions--;
+                        break;
                     }
                 }
+
                 continue;
-            } 
-            
-            if (additions != 0)
+            }
+
+            if (additions != 0 || subtractions != 0)
             {
                 for (int i = 0; i < op.Count; i++)
                 {
@@ -108,40 +121,34 @@ public class NumberGenerator
                     {
                         tempResult += no[i - 1] + no[i + 1];
 
-                        numbers[i - 1] = tempResult;
-                        operations[i - 1] = Operation.NotSet;
+                        nums[i - 1] = tempResult;
+                        ops[i - 1] = Operation.NotSet;
 
-                        numbers.RemoveRange(i, 2);
-                        operations.RemoveRange(i, 2);
+                        nums.RemoveRange(i, 2);
+                        ops.RemoveRange(i, 2);
 
                         additions--;
+                        break;
                     }
-                }
-                continue;
-            }
-            
-            if (subtractions != 0)
-            {
-                for (int i = 0; i < op.Count; i++)
-                {
+
                     if (op[i] == Operation.Subtraction)
                     {
                         tempResult += no[i - 1] - no[i + 1];
 
-                        numbers[i - 1] = tempResult;
-                        operations[i - 1] = Operation.NotSet;
+                        nums[i - 1] = tempResult;
+                        ops[i - 1] = Operation.NotSet;
 
-                        numbers.RemoveRange(i, 2);
-                        operations.RemoveRange(i, 2);
+                        nums.RemoveRange(i, 2);
+                        ops.RemoveRange(i, 2);
 
                         subtractions--;
+                        break;
                     }
                 }
+
                 continue;
             }
         }
-
-        return new Level();
     }
 
     private static List<Operation> AdjustOperationIndices(List<Operation> operations)
@@ -205,7 +212,7 @@ public class NumberGenerator
     {
         for (int i = 0; i < totalNumbers - 1; i++)
         {
-            operations.Add(AvailableOperationsMap.ElementAt(Random.Range(0, AvailableOperationsMap.Count - 1)).Key);
+            operations.Add(AvailableOperationsMap.ElementAt(Random.Range(0, AvailableOperationsMap.Count)).Key);
         }
     }
 

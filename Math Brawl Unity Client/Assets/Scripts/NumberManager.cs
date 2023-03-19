@@ -22,6 +22,20 @@ public class NumberManager : MonoBehaviour
 
     public void GetNumbers()
     {
-        var numbers = NumberGenerator.GenerateIntegers(totalNumbers);
+        var level = NumberGenerator.GenerateIntegers(totalNumbers);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < level.Numbers.Count; i++)
+        {
+            if (i <= level.Operations.Count-1)
+            {
+                stringBuilder.Append(level.Numbers[i]).Append(level.Operations[i]);
+            }
+            else
+            {
+                stringBuilder.Append(level.Numbers[i]);
+            }
+        }
+        Debug.Log(stringBuilder.ToString() + "=" + level.Solution);
     }
 }
