@@ -32,7 +32,7 @@ namespace MathBrawlServer
             { Operation.Division,       "\u00F7" }
         };
 
-        public static Level GenerateIntegers(int totalNumbers = 2)
+        public static Level GenerateIntegers(int totalNumbers = 2, bool hasDivision = false)
         {
             List<int> numbers = new List<int>()                /*{ 1,2,4,5,2,8,2 }*/;
             List<Operation> operations = new List<Operation>() /*{ Operation.Addition , Operation.Multiplication, Operation.Subtraction, Operation.Addition, Operation.Multiplication, Operation.Subtraction}*/;
@@ -42,7 +42,7 @@ namespace MathBrawlServer
             int divisions = 0;
             
             GetRandomNumbers(totalNumbers, numbers);
-            GetRandomOperations(totalNumbers, operations);
+            GetRandomOperations(totalNumbers, operations, hasDivision);
             GetOperationCounters(operations, ref additions, ref subtractions, ref multiplications, ref divisions);
 
             var nums    = AdjustNumberIndices(numbers);
@@ -208,13 +208,22 @@ namespace MathBrawlServer
             }
         }
 
-        private static void GetRandomOperations(int totalNumbers, List<Operation> operations)
+        private static void GetRandomOperations(int totalNumbers, List<Operation> operations, bool allowDivision = false)
         {
             Random random = new Random();
             
             for (int i = 0; i < totalNumbers - 1; i++)
             {
-                operations.Add(AvailableOperationsMap.ElementAt(random.Next(0, AvailableOperationsMap.Count)).Key);
+                if (allowDivision)
+                {
+                    operations.Add(AvailableOperationsMap.ElementAt(random.Next(0, AvailableOperationsMap.Count)).Key);                    
+                }
+                else
+                {
+                    operations.Add(AvailableOperationsMap.ElementAt(random.Next(0, AvailableOperationsMap.Count-1)).Key);
+                }
+                
+                
             }
         }
 

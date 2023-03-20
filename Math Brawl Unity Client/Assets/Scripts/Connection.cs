@@ -5,6 +5,7 @@ using UnityEngine;
 
 using NativeWebSocket;
 using Newtonsoft.Json;
+using TMPro;
 
 public class Connection : MonoBehaviour
 {
@@ -64,12 +65,21 @@ public class Connection : MonoBehaviour
                 // activate waiting for opponent
                 break;
             case "playing":
+                Refs.PlayerCreation.SetActive(false);
+                // activate game window
+                Refs.GameWindow.SetActive(true);
+                
                 Refs.GameStatus.SetActive(false);
                 
                 Refs.TimerText.text = payload.Level.Time.ToString();
                 
                 Refs.NumbersContainer.SetActive(true);
                 // instantiate all numbers
+                foreach (var number in payload.Level.Numbers)
+                {
+                    var item = Instantiate(Refs.NumberItem, Refs.NumbersContainer.transform);
+                    item.transform.GetChild(0).GetComponent<TMP_Text>().text = number.ToString();
+                }
                 
                 Refs.OperationsContainer.SetActive(true);
                 // instantiate all operations

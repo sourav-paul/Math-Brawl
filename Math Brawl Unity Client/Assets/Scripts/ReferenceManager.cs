@@ -18,10 +18,22 @@ public class ReferenceManager : MonoBehaviour
     public GameObject GameWindow;
     public TMP_Text TimerText;
     public GameObject GameContainer;
+    
     public GameObject NumbersContainer;
+    public GameObject NumberItem;
+    
     public GameObject OperationsContainer;
+    public GameObject AdditionDraggable;
+    public GameObject SubtractionDraggable;
+    public GameObject MultiplicationDraggable;
+    public GameObject DivisionDraggable;
+    
     public GameObject DropablesContainer;
     public GameObject GameStatus;
+    
+    public GameObject DroppableItem;
+    
+    
     
     public GameObject ConnectionManager;
 

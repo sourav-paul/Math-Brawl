@@ -47,6 +47,7 @@ namespace MathBrawlServer
                         Console.WriteLine($"Receive->Close");
 
                         _manager.GetAllSockets().TryRemove(id, out WebSocket sock);
+                        // remove the player from room as well
                         Console.WriteLine("Managed Connections: " + _manager.GetAllSockets().Count.ToString());
 
                         await sock.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
@@ -121,24 +122,6 @@ namespace MathBrawlServer
             //             await sock.Value.SendAsync(Encoding.UTF8.GetBytes(routeOb.Message.ToString()), WebSocketMessageType.Text, true, CancellationToken.None);
             //     }
             // }
-        }
-
-        public async Task RouteGameMessageAsync(string message)
-        {
-            var payload = JsonConvert.DeserializeObject<Payload>(message);
-
-            switch (payload.Status)
-            {
-                case "user-creation":
-                    payload.Status = "room";
-                    _manager.AddPlayerToRoom(payload);
-                    break;
-                
-                
-                
-                default:
-                    break;
-            }
         }
     }
 }
