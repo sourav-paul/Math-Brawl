@@ -48,6 +48,7 @@ namespace MathBrawlServer
 
                         _manager.GetAllSockets().TryRemove(id, out WebSocket sock);
                         // remove the player from room as well
+                        _manager.rooms.Clear();
                         Console.WriteLine("Managed Connections: " + _manager.GetAllSockets().Count.ToString());
 
                         await sock.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);

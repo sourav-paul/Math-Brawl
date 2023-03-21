@@ -37,6 +37,9 @@ public class ReferenceManager : MonoBehaviour
     
     public GameObject ConnectionManager;
 
+    public GameObject GameResetButton;
+    public GameObject LevelResetButton;
+    
     private void Awake()
     {
 

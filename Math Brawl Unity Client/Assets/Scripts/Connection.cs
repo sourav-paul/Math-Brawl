@@ -19,6 +19,8 @@ public class Connection : MonoBehaviour
 
     public ReferenceManager Refs;
 
+    public List<string> droppedItems = new List<string>();
+
     async void Start()
     {
         ConnectWs();
@@ -53,112 +55,29 @@ public class Connection : MonoBehaviour
         }
     }
 
+    private Payload CurrentPayload = new Payload();
     private void ProcessGameMessages(string message)
     {
         var payload = JsonConvert.DeserializeObject<Payload>(message);
+        CurrentPayload = payload;
         
         switch (payload.Status)
         {
             case "room":
-                Refs.PlayerCreation.SetActive(false);
-                // activate game window
-                Refs.GameWindow.SetActive(true);
-                
-                // activate waiting for opponent
+                HandleInRoomWaitingState();
+
                 break;
             case "playing":
-                Refs.PlayerCreation.SetActive(false);
-                // activate game window
-                Refs.GameWindow.SetActive(true);
-                
-                Refs.GameStatus.SetActive(false);
-                
-                Refs.TimerText.text = payload.Level.Time.ToString();
-                
-                Refs.NumbersContainer.SetActive(true);
-                // remove all numbers for next level if any
-                if (Refs.NumbersContainer.transform.childCount>0)
-                {
-                    for (int i = 0; i < Refs.NumbersContainer.transform.childCount; i++)
-                    {
-                        Destroy(Refs.NumbersContainer.transform.GetChild(i));
-                    }
-                }
-                // instantiate all numbers
-                foreach (var number in payload.Level.Numbers)
-                {
-                    var item = Instantiate(Refs.NumberItem, Refs.NumbersContainer.transform);
-                    item.transform.GetChild(0).GetComponent<TMP_Text>().text = number.ToString();
-                }
-                // disable horizontal layout group
-                Refs.NumbersContainer.transform.GetComponent<HorizontalLayoutGroup>().enabled = false;
-                // initialize items
-                for (int i = 0; i < Refs.NumbersContainer.transform.childCount; i++)
-                {
-                    Refs.DropablesContainer.transform.GetChild(i).GetComponent<Drag>().Init();
-                }
-                    
-                Refs.OperationsContainer.SetActive(true);
-                // disable all ops for next level
-                Refs.AdditionDraggable.SetActive(false);
-                Refs.SubtractionDraggable.SetActive(false);
-                Refs.MultiplicationDraggable.SetActive(false);
-                Refs.DivisionDraggable.SetActive(false);
-                // instantiate all operations
-                foreach (var operation in payload.Level.Operations)
-                {
-                    switch (operation)
-                    {
-                        case LevelGenerator.Operation.Addition:
-                            Refs.AdditionDraggable.SetActive(true);
-                            break;
-                        case LevelGenerator.Operation.Subtraction:
-                            Refs.SubtractionDraggable.SetActive(true);
-                            break;
-                        case LevelGenerator.Operation.Multiplication:
-                            Refs.MultiplicationDraggable.SetActive(true);
-                            break;
-                        case LevelGenerator.Operation.Division:
-                            Refs.DivisionDraggable.SetActive(true);
-                            break;
-                        case LevelGenerator.Operation.NotSet:
-                        default:
-                            Console.WriteLine("Unknown operation!");
-                            break;
-                    }
-                }
-                // disable horizontal layout group
-                Refs.OperationsContainer.transform.GetComponent<HorizontalLayoutGroup>().enabled = false;
-                
-                Refs.DropablesContainer.SetActive(true);
-                // remove all existing droppables for next level if any
-                if (Refs.DropablesContainer.transform.childCount>0)
-                {
-                    for (int i = 0; i < Refs.DropablesContainer.transform.childCount; i++)
-                    {
-                        Destroy(Refs.DropablesContainer.transform.GetChild(i));
-                    }
-                }
-                // instantiate all droppables
-                foreach (var number in payload.Level.Numbers)
-                {
-                    var item = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
-                    item.transform.GetChild(0).GetComponent<TMP_Text>().text = "?";
-                }
-                var equal = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
-                equal.transform.GetChild(0).GetComponent<TMP_Text>().text = "=";
-                var equalImage = equal.transform.GetComponent<Image>();
-                equalImage.raycastTarget = false;
-                equalImage.maskable = false;
-                equalImage.fillCenter = false;
+                EnablePlayingStateUi();
 
-                var solution = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
-                solution.transform.GetChild(0).GetComponent<TMP_Text>().text = payload.Level.Solution.ToString();
-                var solutionImage = solution.transform.GetComponent<Image>();
-                solutionImage.raycastTarget = false;
-                solutionImage.maskable = false;
-                solutionImage.fillCenter = false;
+                StartLevelTimer(payload);
                 
+                EnableNumbers(payload);
+
+                EnableOperations(payload);
+
+                EnableDroppables(payload);
+
                 break;;
             default:
                 Debug.LogError("unknown player status!");
@@ -166,6 +85,152 @@ public class Connection : MonoBehaviour
         }
     }
 
+    private void EnableDroppables(Payload payload)
+    {
+        Refs.DropablesContainer.SetActive(true);
+        // remove all existing droppables for next level if any
+        if (Refs.DropablesContainer.transform.childCount != 0)
+        {
+            for (int i = 0; i < Refs.DropablesContainer.transform.childCount; i++)
+            {
+                Destroy(Refs.DropablesContainer.transform.GetChild(i).gameObject);
+            }
+        }
+
+        // instantiate all droppables
+        for (int i = 0; i < payload.Level.Numbers.Count + payload.Level.Operations.Count; i++)
+        {
+            var item = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
+            item.transform.GetChild(0).GetComponent<TMP_Text>().text = "?";
+        }
+
+        var equal = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
+        equal.transform.GetChild(0).GetComponent<TMP_Text>().text = "=";
+        var equalImage = equal.transform.GetComponent<Image>();
+        equalImage.raycastTarget = false;
+        equalImage.maskable = false;
+        equalImage.fillCenter = false;
+
+        var solution = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
+        solution.transform.GetChild(0).GetComponent<TMP_Text>().text = payload.Level.Solution.ToString();
+        var solutionImage = solution.transform.GetComponent<Image>();
+        solutionImage.raycastTarget = false;
+        solutionImage.maskable = false;
+        solutionImage.fillCenter = false;
+    }
+
+    private void EnableOperations(Payload payload)
+    {
+        Refs.OperationsContainer.SetActive(true);
+        // remove all existing droppables for next level if any
+        if (Refs.OperationsContainer.transform.childCount != 0)
+        {
+            for (int i = 0; i < Refs.OperationsContainer.transform.childCount; i++)
+            {
+                Destroy(Refs.OperationsContainer.transform.GetChild(i).gameObject);
+            }
+        }
+        
+        // instantiate all operations
+        foreach (var operation in payload.Level.Operations)
+        {
+            switch (operation)
+            {
+                case LevelGenerator.Operation.Addition:
+                    var add = Instantiate(Refs.AdditionDraggable, Refs.OperationsContainer.transform);
+                    add.GetComponent<Drag>().operation = operation;
+                    break;
+                case LevelGenerator.Operation.Subtraction:
+                    var sub = Instantiate(Refs.SubtractionDraggable, Refs.OperationsContainer.transform);
+                    sub.GetComponent<Drag>().operation = operation;
+                    break;
+                case LevelGenerator.Operation.Multiplication:
+                    var multi = Instantiate(Refs.MultiplicationDraggable, Refs.OperationsContainer.transform);
+                    multi.GetComponent<Drag>().operation = operation;
+                    break;
+                case LevelGenerator.Operation.Division:
+                    var div = Instantiate(Refs.DivisionDraggable, Refs.OperationsContainer.transform);
+                    div.GetComponent<Drag>().operation = operation;
+                    break;
+                case LevelGenerator.Operation.NotSet:
+                default:
+                    Console.WriteLine("Unknown operation!");
+                    break;
+            }
+        }
+
+        // disable horizontal layout group
+        Refs.OperationsContainer.transform.GetComponent<HorizontalLayoutGroup>().enabled = true;
+        // initialize items
+        for (int i = 0; i < Refs.OperationsContainer.transform.childCount; i++)
+        {
+            Refs.OperationsContainer.transform.GetChild(i).GetComponent<Drag>().Init();
+        }
+    }
+
+    private void EnableNumbers(Payload payload)
+    {
+        Refs.NumbersContainer.SetActive(true);
+        // remove all numbers for next level if any
+        if (Refs.NumbersContainer.transform.childCount != 0)
+        {
+            for (int i = 0; i < Refs.NumbersContainer.transform.childCount; i++)
+            {
+                Destroy(Refs.NumbersContainer.transform.GetChild(i).gameObject);
+            }
+        }
+
+        // instantiate all numbers
+        foreach (var number in payload.Level.Numbers)
+        {
+            var item = Instantiate(Refs.NumberItem, Refs.NumbersContainer.transform);
+            item.transform.GetChild(0).GetComponent<TMP_Text>().text = number.ToString();
+            item.GetComponent<Drag>().number = number;
+        }
+
+        // disable horizontal layout group
+        // Refs.NumbersContainer.transform.GetComponent<HorizontalLayoutGroup>().enabled = true;
+        // initialize items
+        for (int i = 0; i < Refs.NumbersContainer.transform.childCount; i++)
+        {
+            Refs.NumbersContainer.transform.GetChild(i).GetComponent<Drag>().Init();
+        }
+    }
+
+    private void StartLevelTimer(Payload payload)
+    {
+        // Refs.TimerText.text = payload.Level.Time.ToString();
+        var timer = Refs.TimerText.GetComponent<Timer>();
+        timer.currentLevelTimeLeft = payload.Level.Time.Seconds;
+        timer.timerIsRunning = true;
+    }
+
+    private void EnablePlayingStateUi()
+    {
+        Refs.PlayerCreation.SetActive(false);
+        // activate game window
+        Refs.GameWindow.SetActive(true);
+
+        Refs.GameStatus.SetActive(false);
+        
+        Refs.LevelResetButton.SetActive(true);
+    }
+
+    private void HandleInRoomWaitingState()
+    {
+        Refs.PlayerCreation.SetActive(false);
+        // activate game window
+        Refs.GameWindow.SetActive(true);
+        // activate waiting for opponent
+    }
+
+    public void ResetGameUi()
+    {
+        EnableNumbers(CurrentPayload);
+        EnableOperations(CurrentPayload);
+        EnableDroppables(CurrentPayload);
+    }
+    
     private void WebSocketOnClose(WebSocketCloseCode e)
     {
         Debug.Log("Connection closed! " + e);
