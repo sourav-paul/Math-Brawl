@@ -1,12 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Unity.VisualStudio.Editor;
 using UnityEngine;
 
 using NativeWebSocket;
 using Newtonsoft.Json;
 using TMPro;
+using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
 
 public class Connection : MonoBehaviour
@@ -90,7 +90,14 @@ public class Connection : MonoBehaviour
                     var item = Instantiate(Refs.NumberItem, Refs.NumbersContainer.transform);
                     item.transform.GetChild(0).GetComponent<TMP_Text>().text = number.ToString();
                 }
-                
+                // disable horizontal layout group
+                Refs.NumbersContainer.transform.GetComponent<HorizontalLayoutGroup>().enabled = false;
+                // initialize items
+                for (int i = 0; i < Refs.NumbersContainer.transform.childCount; i++)
+                {
+                    Refs.DropablesContainer.transform.GetChild(i).GetComponent<Drag>().Init();
+                }
+                    
                 Refs.OperationsContainer.SetActive(true);
                 // disable all ops for next level
                 Refs.AdditionDraggable.SetActive(false);
@@ -120,6 +127,8 @@ public class Connection : MonoBehaviour
                             break;
                     }
                 }
+                // disable horizontal layout group
+                Refs.OperationsContainer.transform.GetComponent<HorizontalLayoutGroup>().enabled = false;
                 
                 Refs.DropablesContainer.SetActive(true);
                 // remove all existing droppables for next level if any

@@ -3432,6 +3432,7 @@ GameObject:
   - component: {fileID: 719438812}
   - component: {fileID: 719438814}
   - component: {fileID: 719438813}
+  - component: {fileID: 719438815}
   m_Layer: 5
   m_Name: Symbol Item Multiplication
   m_TagString: Untagged
@@ -3497,6 +3498,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 719438811}
   m_CullTransparentMesh: 1
+--- !u!114 &719438815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 719438811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 067832c68c28f4e4f811b0e79b3adb7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thisImage: {fileID: 0}
+  startPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &745905051
 GameObject:
   m_ObjectHideFlags: 0
@@ -6039,6 +6054,7 @@ GameObject:
   - component: {fileID: 1248075031}
   - component: {fileID: 1248075033}
   - component: {fileID: 1248075032}
+  - component: {fileID: 1248075034}
   m_Layer: 5
   m_Name: Symbol Item Division
   m_TagString: Untagged
@@ -6104,6 +6120,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1248075030}
   m_CullTransparentMesh: 1
+--- !u!114 &1248075034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1248075030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 067832c68c28f4e4f811b0e79b3adb7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thisImage: {fileID: 0}
+  startPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &1257048984
 GameObject:
   m_ObjectHideFlags: 0
@@ -8674,6 +8704,7 @@ GameObject:
   - component: {fileID: 1621611601}
   - component: {fileID: 1621611603}
   - component: {fileID: 1621611602}
+  - component: {fileID: 1621611604}
   m_Layer: 5
   m_Name: Symbol Item Subtraction
   m_TagString: Untagged
@@ -8739,6 +8770,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1621611600}
   m_CullTransparentMesh: 1
+--- !u!114 &1621611604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1621611600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 067832c68c28f4e4f811b0e79b3adb7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thisImage: {fileID: 0}
+  startPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &1624619593
 GameObject:
   m_ObjectHideFlags: 0
@@ -9343,6 +9388,7 @@ GameObject:
   - component: {fileID: 1770204375}
   - component: {fileID: 1770204377}
   - component: {fileID: 1770204376}
+  - component: {fileID: 1770204378}
   m_Layer: 5
   m_Name: Symbol Item Addition
   m_TagString: Untagged
@@ -9408,6 +9454,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1770204374}
   m_CullTransparentMesh: 1
+--- !u!114 &1770204378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1770204374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 067832c68c28f4e4f811b0e79b3adb7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thisImage: {fileID: 0}
+  startPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &1794826197
 GameObject:
   m_ObjectHideFlags: 0
