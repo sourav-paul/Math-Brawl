@@ -90,29 +90,17 @@ namespace MathBrawlServer
             {
                 case "user-creation":
                     payload.Status = "room";
+                    await SendUserConfirmation(payload);
                     _manager.AddPlayerToRoom(payload);
+                    
                     break;
-                
-                
-                
+                case "game-data":
+                    payload.Status = "playing";
+                    break;
                 default:
                     break;
             }
-
-            if (!string.IsNullOrEmpty(payload.PlayerId.ToString()))
-            {
-                Console.WriteLine("Targeted");
-                var sock = _manager.GetAllSockets().FirstOrDefault(s => s.Key == payload.PlayerId.ToString());
-                if (sock.Value != null)
-                {
-                    if (sock.Value.State == WebSocketState.Open)
-                        await sock.Value.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload)), WebSocketMessageType.Text, true, CancellationToken.None);
-                }
-                else
-                {
-                    Console.WriteLine("Invalid Recipient");
-                }
-            }
+            
             // else
             // {
             //     Console.WriteLine("Broadcast");
@@ -122,6 +110,25 @@ namespace MathBrawlServer
             //             await sock.Value.SendAsync(Encoding.UTF8.GetBytes(routeOb.Message.ToString()), WebSocketMessageType.Text, true, CancellationToken.None);
             //     }
             // }
+        }
+
+        private async Task SendUserConfirmation(Payload payload)
+        {
+            if (!string.IsNullOrEmpty(payload.PlayerId.ToString()))
+            {
+                Console.WriteLine("Targeted");
+                var sock = _manager.GetAllSockets().FirstOrDefault(s => s.Key == payload.PlayerId.ToString());
+                if (sock.Value != null)
+                {
+                    if (sock.Value.State == WebSocketState.Open)
+                        await sock.Value.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload)),
+                            WebSocketMessageType.Text, true, CancellationToken.None);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid Recipient");
+                }
+            }
         }
     }
 }

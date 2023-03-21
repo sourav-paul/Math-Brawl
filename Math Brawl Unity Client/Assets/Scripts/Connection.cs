@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Unity.VisualStudio.Editor;
 using UnityEngine;
 
 using NativeWebSocket;
 using Newtonsoft.Json;
 using TMPro;
+using Image = UnityEngine.UI.Image;
 
 public class Connection : MonoBehaviour
 {
@@ -74,6 +76,14 @@ public class Connection : MonoBehaviour
                 Refs.TimerText.text = payload.Level.Time.ToString();
                 
                 Refs.NumbersContainer.SetActive(true);
+                // remove all numbers for next level if any
+                if (Refs.NumbersContainer.transform.childCount>0)
+                {
+                    for (int i = 0; i < Refs.NumbersContainer.transform.childCount; i++)
+                    {
+                        Destroy(Refs.NumbersContainer.transform.GetChild(i));
+                    }
+                }
                 // instantiate all numbers
                 foreach (var number in payload.Level.Numbers)
                 {
@@ -82,10 +92,63 @@ public class Connection : MonoBehaviour
                 }
                 
                 Refs.OperationsContainer.SetActive(true);
+                // disable all ops for next level
+                Refs.AdditionDraggable.SetActive(false);
+                Refs.SubtractionDraggable.SetActive(false);
+                Refs.MultiplicationDraggable.SetActive(false);
+                Refs.DivisionDraggable.SetActive(false);
                 // instantiate all operations
+                foreach (var operation in payload.Level.Operations)
+                {
+                    switch (operation)
+                    {
+                        case LevelGenerator.Operation.Addition:
+                            Refs.AdditionDraggable.SetActive(true);
+                            break;
+                        case LevelGenerator.Operation.Subtraction:
+                            Refs.SubtractionDraggable.SetActive(true);
+                            break;
+                        case LevelGenerator.Operation.Multiplication:
+                            Refs.MultiplicationDraggable.SetActive(true);
+                            break;
+                        case LevelGenerator.Operation.Division:
+                            Refs.DivisionDraggable.SetActive(true);
+                            break;
+                        case LevelGenerator.Operation.NotSet:
+                        default:
+                            Console.WriteLine("Unknown operation!");
+                            break;
+                    }
+                }
                 
                 Refs.DropablesContainer.SetActive(true);
+                // remove all existing droppables for next level if any
+                if (Refs.DropablesContainer.transform.childCount>0)
+                {
+                    for (int i = 0; i < Refs.DropablesContainer.transform.childCount; i++)
+                    {
+                        Destroy(Refs.DropablesContainer.transform.GetChild(i));
+                    }
+                }
                 // instantiate all droppables
+                foreach (var number in payload.Level.Numbers)
+                {
+                    var item = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
+                    item.transform.GetChild(0).GetComponent<TMP_Text>().text = "?";
+                }
+                var equal = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
+                equal.transform.GetChild(0).GetComponent<TMP_Text>().text = "=";
+                var equalImage = equal.transform.GetComponent<Image>();
+                equalImage.raycastTarget = false;
+                equalImage.maskable = false;
+                equalImage.fillCenter = false;
+
+                var solution = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
+                solution.transform.GetChild(0).GetComponent<TMP_Text>().text = payload.Level.Solution.ToString();
+                var solutionImage = solution.transform.GetComponent<Image>();
+                solutionImage.raycastTarget = false;
+                solutionImage.maskable = false;
+                solutionImage.fillCenter = false;
                 
                 break;;
             default:
