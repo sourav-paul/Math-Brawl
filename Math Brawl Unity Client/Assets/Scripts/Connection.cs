@@ -248,6 +248,8 @@ public class Connection : MonoBehaviour
                 {
                     Refs.LevelCompletionStatus.SetActive(true);
                     Refs.LevelCompletionStatus.GetComponent<TMP_Text>().text = "CORRECT !";
+                    CurrentPayload.Score += 5;
+                    Refs.Score.text = CurrentPayload.Score.ToString();
                     StartCoroutine(AskForNextAfterCorrect());
                 }
                 else
@@ -268,26 +270,31 @@ public class Connection : MonoBehaviour
         }
     }
 
-    IEnumerator ResetBecauseIncorrect()
+    public IEnumerator ResetBecauseIncorrect()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.0f);
         
         ResetGameUi();
     }
     
-    IEnumerator AskForNextAfterCorrect()
+    public IEnumerator AskForNextAfterCorrect()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.0f);
         
-        //NextLevel();
+        ResetGameUi();
+        
+        SendMessage(JsonConvert.SerializeObject(CurrentPayload));
     }
-    
+
     private void StartLevelTimer(Payload payload)
     {
         // Refs.TimerText.text = payload.Level.Time.ToString();
         var timer = Refs.TimerText.GetComponent<Timer>();
         timer.currentLevelTimeLeft = payload.Level.Time.Seconds;
         timer.timerIsRunning = true;
+
+        Refs.Score.text = payload.Score.ToString();
+        Refs.PlayerName.text = payload.PlayerName.ToString();
     }
 
     private void EnablePlayingStateUi()

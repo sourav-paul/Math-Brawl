@@ -14,7 +14,7 @@ public class Payload
     public Guid RoomId { get; set; }
     public string PlayerName { get; set; }
     public Guid OpponentId { get; set; }
-        
+    public int Score { get; set; }
     public LevelGenerator.Level Level { get; set; }
     public Dashboard Dashboard { get; set; }
     public Dictionary<string, int> Leaderboard { get; set; }

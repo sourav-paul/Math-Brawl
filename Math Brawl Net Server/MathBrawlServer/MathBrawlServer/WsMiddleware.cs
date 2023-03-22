@@ -97,6 +97,7 @@ namespace MathBrawlServer
                     break;
                 case "game-data":
                     payload.Status = "playing";
+                    _manager.SendNextLevel(payload);
                     break;
                 default:
                     break;

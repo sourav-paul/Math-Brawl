@@ -27,7 +27,7 @@ public class Timer : MonoBehaviour
             }
             else
             {
-                // EndCurrentLevel();
+                StartCoroutine(FindObjectOfType<Connection>().AskForNextAfterCorrect());
                 currentLevelTimeLeft = 0;
                 timerIsRunning = false;
             }

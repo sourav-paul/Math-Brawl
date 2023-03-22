@@ -17,8 +17,6 @@ namespace MathBrawlServer
         public ConcurrentDictionary<Guid, ConcurrentBag<Payload>> rooms =
             new ConcurrentDictionary<Guid, ConcurrentBag<Payload>>();
 
-        
-        
         public string AddSocket(WebSocket socket)
         {
             string ConnID = Guid.NewGuid().ToString();
@@ -100,6 +98,23 @@ namespace MathBrawlServer
         public ConcurrentDictionary<string, WebSocket> GetAllSockets()
         {
             return _sockets;
+        }
+
+        public void SendNextLevel(Payload payload)
+        {
+            foreach (var room in rooms)
+            {
+                foreach (var player in room.Value)
+                {
+                    if (player.PlayerId==payload.PlayerId)
+                    {
+                        player.Score = payload.Score;
+                        Console.WriteLine("sending new level to players in a room!");
+                        RouteGameStartAsync(room.Value.ToList());
+                        break;
+                    }
+                }
+            }
         }
     }
 }

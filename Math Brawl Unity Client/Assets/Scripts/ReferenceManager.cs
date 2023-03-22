@@ -41,7 +41,9 @@ public class ReferenceManager : MonoBehaviour
     public GameObject LevelResetButton;
 
     public GameObject LevelCompletionStatus;
-    
+
+    public TMP_Text Score;
+    public TMP_Text PlayerName;
     private void Awake()
     {
 
