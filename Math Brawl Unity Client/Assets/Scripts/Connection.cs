@@ -2,12 +2,14 @@ using System;
 using System.Data;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 using NativeWebSocket;
 using Newtonsoft.Json;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
 
@@ -52,10 +54,27 @@ public class Connection : MonoBehaviour
             ClientPayload.Client = "player";
             Refs.PlayerCreation.SetActive(true);
         }
+        else if (message.Contains("LeaderboardClient") )
+        {
+            InitializeLeaderboard(message);
+        }
+        else if (message.Contains("Key") && message.Contains("Value"))
+        {
+            ProcessSimpleLeaderboard(message);
+        }
         else
         {
             ProcessGameMessages(message);
         }
+    }
+
+    private Dictionary<string, int> Leaderboard = new Dictionary<string, int>();
+    private void InitializeLeaderboard(string message)
+    {
+        ClientPayload.PlayerId = Guid.Parse(message.TrimStart("LeaderboardClient: ".ToCharArray()));
+        ClientPayload.Client = "leaderboard";
+        Refs.Leaderboard.SetActive(true);
+        SendMessage(JsonConvert.SerializeObject(ClientPayload));
     }
 
     private static Payload CurrentPayload = new Payload();
@@ -85,6 +104,87 @@ public class Connection : MonoBehaviour
             default:
                 Debug.LogError("unknown player status!");
                 break;
+        }
+        //
+        // if(payload.Client == "leaderboard")
+        // {
+        //     ProcessLeaderboard(payload);
+        // }
+    }
+
+    private void ProcessSimpleLeaderboard(string message)
+    {
+        var kvp = JsonConvert.DeserializeObject<KeyValuePair<string, int>>(message);
+        
+        if (Refs.LeaderboardContainer.transform.childCount > 0)
+        {
+            for (int i = 0; i < Refs.LeaderboardContainer.transform.childCount; i++)
+            {
+                Destroy(Refs.LeaderboardContainer.transform.GetChild(i).gameObject);
+            }
+        }
+        
+        if (Leaderboard.ContainsKey(kvp.Key) && Leaderboard[kvp.Key] < kvp.Value)
+        {
+            Leaderboard[kvp.Key] = kvp.Value;
+        }
+        else if (Leaderboard.ContainsKey(kvp.Key))
+        {
+            // return; // Do nothing
+        }
+        else
+        {
+            Leaderboard.Add(kvp.Key, kvp.Value);
+        }
+        
+        var sortedDict = from entry in Leaderboard orderby entry.Value descending select entry;
+        
+        // Leaderboard.Clear();
+        // Leaderboard.AddRange(sortedDict);
+
+        int rank = 1;
+        foreach (var item in sortedDict.Take(8))
+        {
+            var i = Instantiate(Refs.LeaderboardItem, Refs.LeaderboardContainer.transform);
+            i.transform.GetChild(0).GetComponent<TMP_Text>().text = rank.ToString();
+            rank++;
+            i.transform.GetChild(2).GetComponent<TMP_Text>().text = item.Key;
+            i.transform.GetChild(3).GetComponent<TMP_Text>().text = item.Value.ToString();
+        }
+    }
+    
+    private void ProcessLeaderboard(Payload payload)
+    {
+        if (Refs.Leaderboard.transform.childCount > 0)
+        {
+            for (int i = 0; i < Refs.Leaderboard.transform.childCount; i++)
+            {
+                Destroy(Refs.Leaderboard.transform.GetChild(0).gameObject);
+            }
+        }
+        
+        if (Leaderboard.ContainsKey(payload.PlayerName) && Leaderboard[payload.PlayerName] < payload.Score)
+        {
+            Leaderboard[payload.PlayerName] = payload.Score;
+        }
+        else
+        {
+            Leaderboard.Add(payload.PlayerName, payload.Score);
+        }
+        
+        var sortedDict = from entry in Leaderboard orderby entry.Value descending select entry;
+        
+        Leaderboard.Clear();
+        Leaderboard.AddRange(sortedDict);
+
+        int rank = 1;
+        foreach (var item in Leaderboard.Take(8))
+        {
+            var i = Instantiate(Refs.LeaderboardItem, Refs.Leaderboard.transform);
+            i.transform.GetChild(0).GetComponent<TMP_Text>().text = rank.ToString();
+            rank++;
+            i.transform.GetChild(2).GetComponent<TMP_Text>().text = item.Key;
+            i.transform.GetChild(3).GetComponent<TMP_Text>().text = item.Value.ToString();
         }
     }
 

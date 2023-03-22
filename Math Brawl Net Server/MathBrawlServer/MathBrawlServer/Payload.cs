@@ -16,7 +16,6 @@ namespace MathBrawlServer
         public int Score { get; set; }
         public LevelGenerator.Level Level { get; set; }
         public Dashboard Dashboard { get; set; }
-        public Dictionary<string, int> Leaderboard { get; set; }
     }
 
     public class Dashboard

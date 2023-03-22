@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class Payload
 {
-    public string Type { get; set; }  // "connect" / "level" / "user-creation"
-    public string Client { get; set; } // "dashboard" / "leaderboard" / "player"
+    public string Type { get; set; }  // "connect" / "level" / "user-creation"/ "game-data" /
+    public string Client { get; set; } // "dashboard" / "leaderboard" / "player" / 
         
     public string Status { get; set; } // "room" / "playing" / 
         
@@ -17,7 +17,6 @@ public class Payload
     public int Score { get; set; }
     public LevelGenerator.Level Level { get; set; }
     public Dashboard Dashboard { get; set; }
-    public Dictionary<string, int> Leaderboard { get; set; }
 }
 
 public class Dashboard

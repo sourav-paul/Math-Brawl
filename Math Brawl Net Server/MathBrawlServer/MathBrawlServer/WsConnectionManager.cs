@@ -110,8 +110,38 @@ namespace MathBrawlServer
                     {
                         player.Score = payload.Score;
                         Console.WriteLine("sending new level to players in a room!");
+                        SendScoresToLeaderboard(room.Value.ToList());
                         RouteGameStartAsync(room.Value.ToList());
                         break;
+                    }
+                }
+            }
+        }
+
+        public string LeaderboardId = String.Empty;
+        
+        private async void SendScoresToLeaderboard(List<Payload> payloads)
+        {
+            foreach (var payload in payloads)
+            {
+                if (!string.IsNullOrEmpty(payload.PlayerId.ToString()))
+                {
+                    Console.WriteLine("Targeted");
+                    var sock = GetAllSockets().FirstOrDefault(s => s.Key == LeaderboardId);
+                    if (sock.Value != null)
+                    {
+                        KeyValuePair<string, int> score =
+                            new KeyValuePair<string, int>(payload.PlayerName, payload.Score);
+                        
+                        if (sock.Value.State == WebSocketState.Open)
+                        {
+                            await sock.Value.SendAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(score)), WebSocketMessageType.Text, true, CancellationToken.None);
+                        }
+                            
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid Recipient");
                     }
                 }
             }

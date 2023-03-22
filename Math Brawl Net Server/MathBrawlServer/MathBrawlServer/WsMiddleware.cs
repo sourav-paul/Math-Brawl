@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -46,9 +48,10 @@ namespace MathBrawlServer
                         string id = _manager.GetAllSockets().FirstOrDefault(s => s.Value == webSocket).Key;
                         Console.WriteLine($"Receive->Close");
 
-                        _manager.GetAllSockets().TryRemove(id, out WebSocket sock);
                         // remove the player from room as well
-                        _manager.rooms.Clear();
+                        ClearRoomThatPlayerLeft(id);
+                        _manager.GetAllSockets().TryRemove(id, out WebSocket sock);
+                        
                         Console.WriteLine("Managed Connections: " + _manager.GetAllSockets().Count.ToString());
 
                         await sock.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
@@ -62,6 +65,26 @@ namespace MathBrawlServer
                 Console.WriteLine("Second Request Delegate - No WebSocket");
                 await _next(context);
             }   
+        }
+
+        private void ClearRoomThatPlayerLeft(string id)
+        {
+            var guidPlayer = Guid.Parse(id);
+
+            var roomGuid = Guid.Empty;
+            
+            foreach (var kvp in _manager.rooms)
+            {
+                foreach (var player in kvp.Value)
+                {
+                    if (player.PlayerId == guidPlayer)
+                    {
+                        roomGuid = kvp.Key;
+                    }
+                }
+            }
+
+            _manager.rooms.TryRemove(roomGuid, out ConcurrentBag<Payload> payloads);
         }
 
         private async Task Receive(WebSocket socket, Action<WebSocketReceiveResult, byte[]> handleMessage)
@@ -79,8 +102,18 @@ namespace MathBrawlServer
         
         private async Task SendConnIDAsync(WebSocket socket, string connID)
         {
-            var buffer = Encoding.UTF8.GetBytes("ConnID: " + connID);
-            await socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+            byte[] buffer;
+            if (_manager.GetAllSockets().Count == 1)
+            {
+                _manager.LeaderboardId = connID;
+                buffer = Encoding.UTF8.GetBytes("LeaderboardClient: " + connID);
+                await socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+            }
+            else if (_manager.GetAllSockets().Count > 1)
+            {
+                buffer = Encoding.UTF8.GetBytes("ConnID: " + connID);
+                await socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+            }
         }
         
         private async Task RouteJSONMessageAsync(string message)

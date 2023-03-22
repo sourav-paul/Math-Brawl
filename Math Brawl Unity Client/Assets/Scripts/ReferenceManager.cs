@@ -9,6 +9,8 @@ using UnityEngine.UI;
 public class ReferenceManager : MonoBehaviour
 {
     public GameObject Leaderboard;
+    public GameObject LeaderboardContainer;
+    public GameObject LeaderboardItem;
     
     public GameObject PlayerCreation;
     public TMP_InputField PlayerNameInput;
