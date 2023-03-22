@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,10 +9,10 @@ public class Drag : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
 {
     public int number = 0;
     public LevelGenerator.Operation operation = LevelGenerator.Operation.NotSet;
-    
+
     public Image thisImage;
     public Vector3 startPosition;
-    
+
     public void Init()
     {
         thisImage = GetComponent<Image>();

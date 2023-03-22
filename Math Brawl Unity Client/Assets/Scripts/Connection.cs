@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,7 @@ using UnityEngine;
 using NativeWebSocket;
 using Newtonsoft.Json;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
 
@@ -19,7 +21,8 @@ public class Connection : MonoBehaviour
 
     public ReferenceManager Refs;
 
-    public List<string> droppedItems = new List<string>();
+    public static Dictionary<Guid, KeyValuePair<int, LevelGenerator.Operation>> droppedItems =
+        new Dictionary<Guid, KeyValuePair<int, LevelGenerator.Operation>>();
 
     async void Start()
     {
@@ -55,7 +58,7 @@ public class Connection : MonoBehaviour
         }
     }
 
-    private Payload CurrentPayload = new Payload();
+    private static Payload CurrentPayload = new Payload();
     private void ProcessGameMessages(string message)
     {
         var payload = JsonConvert.DeserializeObject<Payload>(message);
@@ -102,6 +105,7 @@ public class Connection : MonoBehaviour
         {
             var item = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
             item.transform.GetChild(0).GetComponent<TMP_Text>().text = "?";
+            droppedItems.Add(item.GetComponent<Drop>().id, new KeyValuePair<int, LevelGenerator.Operation>(0, LevelGenerator.Operation.NotSet));
         }
 
         var equal = Instantiate(Refs.DroppableItem, Refs.DropablesContainer.transform);
@@ -197,6 +201,87 @@ public class Connection : MonoBehaviour
         }
     }
 
+    public static int totalDroppedItems = 0;
+    public void CheckForAllDrops()
+    {
+        totalDroppedItems++;
+        
+        if (totalDroppedItems == CurrentPayload.Level.Numbers.Count + CurrentPayload.Level.Operations.Count)
+        {
+            string calculation = String.Empty;
+            
+            foreach (var kvp in droppedItems)
+            {
+                if (kvp.Value.Key != 0)
+                {
+                    calculation += kvp.Value.Key.ToString();
+                }
+                else if (kvp.Value.Value !=LevelGenerator.Operation.NotSet)
+                {
+                    switch (kvp.Value.Value)
+                    {
+                        case LevelGenerator.Operation.Addition:
+                            calculation += "+";
+                            break;
+                        case LevelGenerator.Operation.Subtraction:
+                            calculation += "-";
+                            break;
+                        case LevelGenerator.Operation.Multiplication:
+                            calculation += "*";
+                            break;
+                        case LevelGenerator.Operation.Division:
+                            calculation += "/";
+                            break;
+                        case LevelGenerator.Operation.NotSet:
+                        default:
+                            Console.WriteLine("Unknown operation!");
+                            break;
+                    }
+                }
+            }
+
+            try
+            {
+                var result = new DataTable().Compute(calculation, null);
+                // correct
+                if (Convert.ToInt32(result) == CurrentPayload.Level.Solution)
+                {
+                    Refs.LevelCompletionStatus.SetActive(true);
+                    Refs.LevelCompletionStatus.GetComponent<TMP_Text>().text = "CORRECT !";
+                    StartCoroutine(AskForNextAfterCorrect());
+                }
+                else
+                {
+                    // incorrect
+                    Refs.LevelCompletionStatus.SetActive(true);
+                    Refs.LevelCompletionStatus.GetComponent<TMP_Text>().text = "INCORRECT !";
+                    StartCoroutine(ResetBecauseIncorrect());
+                }
+            }
+            catch (Exception e)
+            {
+                // incorrect
+                Refs.LevelCompletionStatus.SetActive(true);
+                Refs.LevelCompletionStatus.GetComponent<TMP_Text>().text = "INCORRECT !";
+                StartCoroutine(ResetBecauseIncorrect());
+            }
+        }
+    }
+
+    IEnumerator ResetBecauseIncorrect()
+    {
+        yield return new WaitForSeconds(1.5f);
+        
+        ResetGameUi();
+    }
+    
+    IEnumerator AskForNextAfterCorrect()
+    {
+        yield return new WaitForSeconds(1.5f);
+        
+        //NextLevel();
+    }
+    
     private void StartLevelTimer(Payload payload)
     {
         // Refs.TimerText.text = payload.Level.Time.ToString();
@@ -214,6 +299,8 @@ public class Connection : MonoBehaviour
         Refs.GameStatus.SetActive(false);
         
         Refs.LevelResetButton.SetActive(true);
+        
+        Refs.LevelCompletionStatus.SetActive(false);
     }
 
     private void HandleInRoomWaitingState()
@@ -226,6 +313,11 @@ public class Connection : MonoBehaviour
 
     public void ResetGameUi()
     {
+        Refs.LevelCompletionStatus.SetActive(false);
+        
+        droppedItems.Clear();
+        totalDroppedItems = 0;
+        
         EnableNumbers(CurrentPayload);
         EnableOperations(CurrentPayload);
         EnableDroppables(CurrentPayload);
